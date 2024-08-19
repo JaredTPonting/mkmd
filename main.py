@@ -1,6 +1,7 @@
 import ast
 import inspect
 import os
+import sys
 
 
 def get_type_hints(function_node):
@@ -104,11 +105,10 @@ def generate_markdown(file_path: str, functions: list, classes: list):
                 else:
                     md_file.write('No Methods Defined.<br>\n')
 
-    print('Markdown Document Generated')
+    print(f'Markdown Document Generated: {doc_name}')
 
 
 if __name__ == '__main__':
-    python_file = 'main.py'  # path of py file to be created
-
-    functions, classes = parse_python_file(python_file)
-    generate_markdown(python_file, functions, classes)
+    path = sys.argv[1]
+    functions, classes = parse_python_file(path)
+    generate_markdown(path, functions, classes)
