@@ -18,4 +18,13 @@ To use the Python Markdown Documentation Generator, simply clone this repository
 
 ```bash
 git clone https://github.com/JaredTPonting/mkmd.git
-cd markdown-doc-generator
+cd mkmd
+```
+
+## Usage
+1. Navigate to cloned directory as above
+2. Get the file path of the python document you wish to generate documentation for.
+3. Run the following script with your desired FILE_PATH
+```
+python main.py --path "FILE_PATH"
+```
