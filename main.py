@@ -1,7 +1,6 @@
 import ast
-import inspect
 import os
-import sys
+import argparse
 
 
 def get_type_hints(function_node):
@@ -109,6 +108,11 @@ def generate_markdown(file_path: str, functions: list, classes: list):
 
 
 if __name__ == '__main__':
-    path = sys.argv[1]
+    parser = argparse.ArgumentParser(
+        description="Script that generates MD file for file path given in cmd"
+    )
+    parser.add_argument("--path", required=True, type=str)
+    args = parser.parse_args()
+    path = args.path
     functions, classes = parse_python_file(path)
     generate_markdown(path, functions, classes)
