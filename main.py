@@ -68,15 +68,16 @@ def generate_markdown(file_path: str, functions: list, classes: list):
             md_file.write('## Functions <br>\n')
             for func in functions:
                 md_file.write(f'### {func["name"]}() <br>\n')
-                md_file.write(f'**Type Hints:** <br>\n')
-                for arg, type_hint in func['args'].items():
-                    md_file.write(f'- {arg}: {type_hint} <br>\n')
-                md_file.write(f'- return: {func["return"]} <br>\n')
                 if func['docstring']:
                     md_file.write('**Docstring:** ')
                     md_file.write(f'{func["docstring"]}() <br>\n')
                 else:
                     md_file.write('**Docstring:** None. <br>\n')
+                md_file.write(f'**Type Hints:** <br>\n')
+                for arg, type_hint in func['args'].items():
+                    md_file.write(f'- {arg}: {type_hint} <br>\n')
+                md_file.write(f'- return: {func["return"]} <br>\n')
+
         if classes:
             md_file.write('## Classes <br> \n')
             for cls in classes:
@@ -90,15 +91,16 @@ def generate_markdown(file_path: str, functions: list, classes: list):
                     md_file.write(f'**Methods:** <br>\n')
                     for method in cls['methods']:
                         md_file.write(f'### {method["name"]}() <br>\n')
-                        md_file.write(f'**Type Hints:** <br>\n')
-                        for arg, type_hint in method['args'].items():
-                            md_file.write(f'- {arg}: {type_hint} <br>\n')
-                        md_file.write(f'- return: {method["return"]} <br>\n')
                         if method['docstring']:
                             md_file.write('**Docstring:** ')
                             md_file.write(f'{method["docstring"]}() <br>\n')
                         else:
                             md_file.write('**Docstring:** None. <br>\n')
+                        md_file.write(f'**Type Hints:** <br>\n')
+                        for arg, type_hint in method['args'].items():
+                            md_file.write(f'- {arg}: {type_hint} <br>\n')
+                        md_file.write(f'- return: {method["return"]} <br>\n')
+
                 else:
                     md_file.write('No Methods Defined.<br>\n')
 
@@ -106,7 +108,7 @@ def generate_markdown(file_path: str, functions: list, classes: list):
 
 
 if __name__ == '__main__':
-    python_file = 'utility_functions.py'  # path of py file to be created
+    python_file = 'main.py'  # path of py file to be created
 
     functions, classes = parse_python_file(python_file)
     generate_markdown(python_file, functions, classes)
