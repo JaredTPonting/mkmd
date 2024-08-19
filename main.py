@@ -1,0 +1,112 @@
+import ast
+import inspect
+import os
+
+
+def get_type_hints(function_node):
+    """Extract type hints from the function node."""
+    if function_node.returns:
+        return_type = ast.unparse(function_node.returns)
+    else:
+        return_type = "None"
+
+    arg_types = {}
+    for arg in function_node.args.args:
+        if arg.annotation:
+            arg_types[arg.arg] = ast.unparse(arg.annotation)
+        else:
+            arg_types[arg.arg] = 'Any'
+
+    return arg_types, return_type
+
+
+def parse_python_file(file_path: str):
+    """Parse given Python file and extract functions with typehints and docstrings."""
+
+    with open(file_path, 'r') as file:
+        file_content = file.read()
+
+    tree = ast.parse(file_content)
+    functions = []
+    classes = []
+
+    class_functions = []
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef):
+            func_name = node.name
+            if func_name in class_functions:
+                continue
+            docstring = ast.get_docstring(node)
+            arg_types, return_type = get_type_hints(node)
+            functions.append({'name': func_name, 'args': arg_types, 'return': return_type, 'docstring': docstring})
+        elif isinstance(node, ast.ClassDef):
+            class_name = node.name
+            methods = []
+            for class_node in node.body:
+                if isinstance(class_node, ast.FunctionDef):
+                    method_name = class_node.name
+                    class_functions.append(method_name)
+                    docstring = ast.get_docstring(class_node)
+                    arg_types, return_type = get_type_hints(class_node)
+
+                    methods.append(
+                        {'name': method_name, 'args': arg_types, 'return': return_type, 'docstring': docstring})
+            classes.append({'name': class_name, 'methods': methods, 'docstring': ast.get_docstring(node)})
+
+    return functions, classes
+
+
+def generate_markdown(file_path: str, functions: list, classes: list):
+    """Generate a Markdown document from the extracted data."""
+    file_name = os.path.basename(file_path)
+    doc_name = os.path.splitext(file_name)[0] + '.md'
+
+    with open(doc_name, 'w') as md_file:
+        md_file.write(f'# {file_name} \n\n')
+        if functions:
+            md_file.write('## Functions <br>\n')
+            for func in functions:
+                md_file.write(f'### {func["name"]}() <br>\n')
+                md_file.write(f'**Type Hints:** <br>\n')
+                for arg, type_hint in func['args'].items():
+                    md_file.write(f'- {arg}: {type_hint} <br>\n')
+                md_file.write(f'- return: {func["return"]} <br>\n')
+                if func['docstring']:
+                    md_file.write('**Docstring:** ')
+                    md_file.write(f'{func["docstring"]}() <br>\n')
+                else:
+                    md_file.write('**Docstring:** None. <br>\n')
+        if classes:
+            md_file.write('## Classes <br> \n')
+            for cls in classes:
+                md_file.write(f'### {cls["name"]} <br>\n')
+                if cls['docstring']:
+                    md_file.write(f'**Docstring:** {cls["docstring"]} <br>\n')
+                else:
+                    md_file.write('**Docstring:** None <br>\n')
+
+                if cls['methods']:
+                    md_file.write(f'**Methods:** <br>\n')
+                    for method in cls['methods']:
+                        md_file.write(f'### {method["name"]}() <br>\n')
+                        md_file.write(f'**Type Hints:** <br>\n')
+                        for arg, type_hint in method['args'].items():
+                            md_file.write(f'- {arg}: {type_hint} <br>\n')
+                        md_file.write(f'- return: {method["return"]} <br>\n')
+                        if method['docstring']:
+                            md_file.write('**Docstring:** ')
+                            md_file.write(f'{method["docstring"]}() <br>\n')
+                        else:
+                            md_file.write('**Docstring:** None. <br>\n')
+                else:
+                    md_file.write('No Methods Defined.<br>\n')
+
+    print('Markdown Document Generated')
+
+
+if __name__ == '__main__':
+    python_file = 'utility_functions.py'  # path of py file to be created
+
+    functions, classes = parse_python_file(python_file)
+    generate_markdown(python_file, functions, classes)
